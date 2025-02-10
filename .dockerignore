@@ -7,4 +7,3 @@ docker
 *.zip
 client_secrets.json
 mycreds.txt
-poetry.toml

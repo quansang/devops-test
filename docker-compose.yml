@@ -8,8 +8,8 @@ services:
     env_file:
       - .env
     volumes:
-      - /app/.venv
       - .:/app
+      - /app/.venv
     build:
       context: .
       args:

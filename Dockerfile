@@ -4,14 +4,14 @@ FROM python:3.12-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the pyproject.toml and poetry.lock files into the container
-COPY pyproject.toml poetry.lock ./
+# Copy the pyproject.toml file into the container
+COPY pyproject.toml poetry.lock poetry.toml ./
 
 # Install Poetry
 RUN pip install --no-cache-dir poetry
 
 # Install the dependencies using Poetry
-RUN poetry install --no-root --no-dev
+RUN poetry install --no-root --no-interaction
 
 # Copy the rest of the application code into the container
 COPY . .

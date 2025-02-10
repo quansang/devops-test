@@ -3,13 +3,11 @@
 ## How to run
 
 ```bash
-poetry env use python3
-poetry install
-poetry run python main.py
+docker compose up
 ```
 
 ## How to test
 
 ```bash
-poetry run pytest -s
+docker compose run app poetry run pytest -s
 ```
