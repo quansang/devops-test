@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - echo Logging in to Amazon ECR...
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+  build:
+    on-failure: ABORT
+    commands:
+      - echo Building the Docker image...
+      - docker build -f ./Dockerfile -t temp_image:latest .
+      - echo Build completed on `date`
+      - echo $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:$IMAGE_TAG
+      - docker tag temp_image:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:$IMAGE_TAG
+      - docker tag temp_image:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:latest
+      - echo Running Unit Testing...
+      - bash ./ops/unit-test.sh
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:latest
+  post_build:
+    on-failure: ABORT
+    commands:
+      - envsubst < ./ops/taskdef-$TASKDEF_TYPE.json > taskdef.json
+      - envsubst < ./ops/appspec-template.yaml > appspec.yaml
+      - printf '{"ImageURI":"%s"}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_REPOSITORY_NAME:$IMAGE_TAG > imageDetail.json && cat imageDetail.json
+artifacts:
+  files:
+    - taskdef.json
+    - appspec.yaml
+    - imageDetail.json

@@ -5,6 +5,16 @@ from flask import Flask, request, Response
 
 app = Flask(__name__)
 
+
+@app.route("/", methods=["GET"])
+def root():
+    return Response(
+        status=200,
+        response=json.dumps({
+            "message": "Welcome to the API"
+        })
+    )
+
 @app.route("/healthcheck", methods=["GET"])
 def healthcheck():
     return Response(

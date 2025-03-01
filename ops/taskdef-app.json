@@ -1,0 +1,45 @@
+{
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "family": "$AWS_ECS_TASK_FAMILY",
+  "executionRoleArn": "$AWS_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "$AWS_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "image": "<IMAGE1_NAME>",
+      "name": "$CONTAINER_NAME",
+      "mountPoints": [],
+      "logConfiguration": {
+        "options": {
+          "awslogs-group": "$AWS_LOGS_GROUP",
+          "awslogs-region": "$AWS_REGION",
+          "awslogs-stream-prefix": "$IMAGE_TAG"
+        },
+        "logDriver": "awslogs"
+      },
+      "volumesFrom": [],
+      "cpu": 0,
+      "entryPoint": [
+        "/bin/bash",
+        "-c",
+        "chmod +x run.sh && ./run.sh"
+      ],
+      "portMappings": [
+        {
+          "protocol": "tcp",
+          "containerPort": $CONTAINER_PORT,
+          "hostPort": $HOST_PORT
+        }
+      ],
+      "environment": [],
+      "essential": true,
+      "linuxParameters": {
+        "initProcessEnabled": true
+      }
+    }
+  ],
+  "memory": "$TASK_MEMORY",
+  "cpu": "$TASK_CPU"
+}
